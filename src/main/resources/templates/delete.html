@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Удаление автомобиля</title>
+</head>
+<body>
+<h3>Подтвердите удаление автомобиля</h3>
+
+<a th:text="${car.toString()}"></a>
+<a th:text="${car.getBrand()}"></a>
+
+
+<p>
+<form th:method="DELETE" th:action="@{/}">
+    <input type="hidden" name="id" th:value="${car.getId()}"/>
+    <input type="submit" value="Удалить"/>
+</form>
+<form method="GET" action="/">
+    <input type="submit" value="Отмена"/>
+</form>
+</p>
+
+</body>
+</html>

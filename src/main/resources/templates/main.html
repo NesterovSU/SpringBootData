@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>База автомобилей</title>
+
+</head>
+<body>
+<div style="color:blue" th:text="${statistics}"/>
+<hr>
+<h3>Добавление нового автомобиля</h3>
+
+<form th:method="POST" th:action="@{/}" th:object="${car}">
+    <input type="text" id="brand" th:field="*{brand}" placeholder="Введите марку"/>
+    <input type="text" id="model" th:field="*{model}" placeholder="модель"/>
+    <input type="text" id="color" th:field="*{color}" placeholder="цвет"/>
+    <input type="text" id="year" th:field="*{year}" placeholder="год выпуска"/>
+    <input type="text" id="number" th:field="*{number}" placeholder="рег номер"/>
+    <input type="submit" value="Добавить">
+    <div style="color:red">
+        <div th:text="${error}"></div>
+        <div th:if="${#fields.hasErrors('brand')}" th:errors="*{brand}"></div>
+        <div th:if="${#fields.hasErrors('model')}" th:errors="*{model}"></div>
+        <div th:if="${#fields.hasErrors('color')}" th:errors="*{color}"></div>
+        <div th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+        <div th:if="${#fields.hasErrors('number')}" th:errors="*{number}"></div>
+    </div>
+</form>
+
+<br>
+<hr>
+
+<div style="color:green" th:text="${message}"/>
+
+<h3>Фильтр поиска</h3>
+
+<form method="POST" action="filter">
+    <input type="text" id="find-brand" name="brand" placeholder="Введите марку"/>
+    <input type="text" id="find-model" name="model" placeholder="модель"/>
+    <input type="text" id="find-color" name="color" placeholder="цвет"/>
+    <input type="text" id="find-year" name="year" placeholder="год выпуска"/>
+    <input type="submit" value="Найти">
+</form>
+
+<h3>Список автомобилей</h3>
+<div th:each="car : ${cars}">
+    <a th:text="${car.toString()}"/>
+    <a th:href="@{/{id}/delete (id=${car.getId()})}">удалить</a>
+</div>
+
+</body>
+</html>
