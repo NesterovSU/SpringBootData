@@ -51,7 +51,7 @@ public class Car {
 
     @Override
     public String toString(){
-        return String.format("%s  %s  (%s)  произведён в %s  [%s]      ", brand, model, color,year, number);
+        return String.format("%s  %s  (%s)  произведён в %s  [%s]    ", brand, model, color, year, number);
     }
 
     public Long getId() {
@@ -97,6 +97,6 @@ public class Car {
     }
 
     public void setNumber(String number) {
-        this.number = number;
+        this.number = number.toUpperCase();
     }
 }

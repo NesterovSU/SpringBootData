@@ -1,6 +1,7 @@
 package ru.nesterov.app.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +20,7 @@ public class MyController {
     @Autowired
     CarRepo carRepo;
 
+    //Главная страница. Возвращаеются все записи из базы
     @GetMapping("/")
     public String getMainPage(Model m){
         m.addAttribute("car", new Car());
@@ -27,19 +29,35 @@ public class MyController {
         return "main";
     }
 
+    //Страница подтверждения удаления записи
     @GetMapping("/{id}/delete")
     public String carDeletingPage(@PathVariable("id") Long id, Model m){
-        m.addAttribute("car", carRepo.findById(id).stream().findAny().orElse(null));
+        Car car = carRepo.findById(id).stream().findAny().orElse(null);
+        if (car == null) {
+            m.addAttribute("error", "Записи не существует!");
+            return getMainPage(m);
+        }
+        m.addAttribute("car", car);
         return "delete";
     }
 
+    //Удаление записи
     @DeleteMapping("/")
     public String deleteCar(@RequestParam("id") Long id, Model m){
-        carRepo.deleteById(id);
-        m.addAttribute("message", "Запись успешно удалена!");
+        try{
+            carRepo.deleteById(id);
+            m.addAttribute("message", "Запись успешно удалена!");
+        }
+        catch (org.springframework.dao.EmptyResultDataAccessException exception){
+            m.addAttribute("error", "Записи не существует!");
+        }
+        catch (Exception exception){
+            m.addAttribute("error", exception.getCause().getMessage());
+        }
         return getMainPage(m);
     }
 
+    //Добавление записи
     @PostMapping("/")
     public String addCar(
             @ModelAttribute("car") @Valid Car car, BindingResult bindingResult,
@@ -50,18 +68,25 @@ public class MyController {
             showStatistics(m);
             return "main";
         }
-        if (carRepo.findByNumber(car.getNumber()).iterator().hasNext()){
-            m.addAttribute("error", "Веденный номер уже существует в базе данных");
-            m.addAttribute("cars", carRepo.findAll());
-            showStatistics(m);
-            return "main";
+        try {
+            carRepo.save(car);
+            m.addAttribute("message", "Запись успешно добавелена!");
         }
-
-        carRepo.save(car);
-        m.addAttribute("message", "Запись успешно добавелена!");
+        catch (DataIntegrityViolationException exception){
+            if (exception.getMostSpecificCause().getMessage().matches(".*\\n.*уже\\sсуществует.*?")){
+                m.addAttribute("error", "Веденный регистрационный номер уже существует в базе данных!");
+            }
+            else {
+                m.addAttribute("error", exception.getMostSpecificCause().getMessage());
+            }
+        }
+        catch (Exception exception){
+            m.addAttribute("error", exception.getCause().getMessage());
+        }
         return getMainPage(m);
     }
 
+    //Возвращаются записи по фильтру
     @PostMapping("/filter")
     public String findCar(
             @RequestParam(name = "brand", required = false) String brand,
@@ -82,7 +107,7 @@ public class MyController {
     }
 
 
-
+    //Подготовка статистики базы
     public void showStatistics(Model m){
         String statistics;
         if(carRepo.findLastTimeStamp() != null && carRepo.findFirstTimeStamp() != null) {
@@ -100,5 +125,4 @@ public class MyController {
         }
         m.addAttribute("statistics", statistics);
     }
-
 }
