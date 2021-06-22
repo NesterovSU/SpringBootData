@@ -6,7 +6,7 @@
 
 </head>
 <body>
-<div style="color:blue" th:text="${statistics}"/>
+<div style="color:blue" th:text="${statistic}"/>
 <hr>
 <h3>Добавление нового автомобиля</h3>
 
@@ -34,7 +34,7 @@
 
 <h3>Фильтр поиска</h3>
 
-<form method="POST" action="filter">
+<form method="GET" action="/">
     <input type="text" id="find-brand" name="brand" placeholder="Введите марку"/>
     <input type="text" id="find-model" name="model" placeholder="модель"/>
     <input type="text" id="find-color" name="color" placeholder="цвет"/>
@@ -45,7 +45,10 @@
 <h3>Список автомобилей</h3>
 <div th:each="car : ${cars}">
     <a th:text="${car.toString()}"/>
-    <a th:href="@{/{id}/delete (id=${car.getId()})}">удалить</a>
+    <form th:method="DELETE" th:action="@{/}">
+        <input type="hidden" name="id" th:value="${car.getId()}"/>
+        <input type="submit" value="Удалить"/>
+    </form>
 </div>
 
 </body>
